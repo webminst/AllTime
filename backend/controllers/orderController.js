@@ -2,6 +2,7 @@
 // @route   POST /api/orders/:id/pix
 // @access  Privado
 exports.iniciarPagamentoPix = async (req, res) => {
+  const logger = require('../utils/logger');
   try {
     const pedido = await Order.findById(req.params.id);
     if (!pedido) {
@@ -17,7 +18,7 @@ exports.iniciarPagamentoPix = async (req, res) => {
     };
     res.json(pixPayload);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao iniciar pagamento PIX' });
   }
 };
@@ -44,7 +45,7 @@ exports.confirmarPagamentoPix = async (req, res) => {
     const pedidoAtualizado = await pedido.save();
     res.json(pedidoAtualizado);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao confirmar pagamento PIX' });
   }
 };
@@ -104,7 +105,7 @@ exports.criarPedido = async (req, res) => {
     const pedidoCriado = await pedido.save();
     res.status(201).json(pedidoCriado);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao criar o pedido' });
   }
 };
@@ -122,7 +123,7 @@ exports.getPedidoPorId = async (req, res) => {
       res.status(404).json({ message: 'Pedido não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar o pedido' });
   }
 };
@@ -150,7 +151,7 @@ exports.atualizarParaPago = async (req, res) => {
       res.status(404).json({ message: 'Pedido não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao atualizar o pedido' });
   }
 };
@@ -172,7 +173,7 @@ exports.atualizarParaEntregue = async (req, res) => {
       res.status(404).json({ message: 'Pedido não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao atualizar o pedido' });
   }
 };
@@ -185,7 +186,7 @@ exports.getMeusPedidos = async (req, res) => {
     const pedidos = await Order.find({ usuario: req.user._id });
     res.json(pedidos);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar os pedidos' });
   }
 };
@@ -198,7 +199,7 @@ exports.getPedidos = async (req, res) => {
     const pedidos = await Order.find({}).populate('usuario', 'id nome');
     res.json(pedidos);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar os pedidos' });
   }
 };

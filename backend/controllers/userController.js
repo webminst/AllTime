@@ -4,11 +4,12 @@ const User = require('../models/User');
 // @route   GET /api/users/profile
 // @access  Privado
 exports.getUserProfile = async (req, res) => {
+  const logger = require('../utils/logger');
   try {
     const user = await User.findById(req.user.id).select('-senha');
     res.json(user);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar perfil do usuário' });
   }
 };
@@ -23,13 +24,13 @@ exports.updateUserProfile = async (req, res) => {
     if (user) {
       user.nome = req.body.nome || user.nome;
       user.email = req.body.email || user.email;
-      
+
       if (req.body.senha) {
         user.senha = req.body.senha;
       }
 
       const updatedUser = await user.save();
-      
+
       res.json({
         _id: updatedUser._id,
         nome: updatedUser.nome,
@@ -41,7 +42,7 @@ exports.updateUserProfile = async (req, res) => {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao atualizar perfil do usuário' });
   }
 };
@@ -54,7 +55,7 @@ exports.getAllUsers = async (req, res) => {
     const users = await User.find({}).select('-senha');
     res.json(users);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar usuários' });
   }
 };
@@ -65,14 +66,14 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-senha');
-    
+
     if (user) {
       res.json(user);
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar usuário' });
   }
 };
@@ -90,7 +91,7 @@ exports.updateUser = async (req, res) => {
       user.isAdmin = req.body.isAdmin === undefined ? user.isAdmin : req.body.isAdmin;
 
       const updatedUser = await user.save();
-      
+
       res.json({
         _id: updatedUser._id,
         nome: updatedUser.nome,
@@ -101,7 +102,7 @@ exports.updateUser = async (req, res) => {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao atualizar usuário' });
   }
 };
@@ -120,7 +121,7 @@ exports.deleteUser = async (req, res) => {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao remover usuário' });
   }
 };

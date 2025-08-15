@@ -4,6 +4,7 @@ const Produto = require('../models/Produto');
 // @route   GET /api/produtos
 // @access  Público
 exports.getProdutos = async (req, res) => {
+  const logger = require('../utils/logger');
   try {
     const pageSize = 10;
     const page = Number(req.query.pageNumber) || 1;
@@ -35,7 +36,7 @@ exports.getProdutos = async (req, res) => {
 
     res.json({ produtos, page, pages: Math.ceil(count / pageSize) });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar produtos' });
   }
 };
@@ -53,7 +54,7 @@ exports.getProdutoPorId = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar o produto' });
   }
 };
@@ -78,7 +79,7 @@ exports.criarProduto = async (req, res) => {
     const produtoCriado = await produto.save();
     res.status(201).json(produtoCriado);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao criar o produto' });
   }
 };
@@ -115,7 +116,7 @@ exports.atualizarProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao atualizar o produto' });
   }
 };
@@ -134,7 +135,7 @@ exports.deletarProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao remover o produto' });
   }
 };
@@ -180,7 +181,7 @@ exports.criarAvaliacaoProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao adicionar avaliação' });
   }
 };
@@ -202,7 +203,7 @@ exports.getProdutosDestaque = async (req, res) => {
     }));
     res.json(produtosMapeados);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao buscar produtos em destaque' });
   }
 };

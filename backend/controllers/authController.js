@@ -5,6 +5,7 @@ const sendEmail = require('../utils/sendEmail');
 // @access  Público
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
+  const logger = require('../utils/logger');
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -26,7 +27,7 @@ exports.forgotPassword = async (req, res) => {
     });
     res.json({ message: 'E-mail de recuperação enviado' });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao enviar e-mail de recuperação' });
   }
 };
@@ -51,7 +52,7 @@ exports.resetPassword = async (req, res) => {
     await user.save();
     res.json({ message: 'Senha redefinida com sucesso' });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Erro ao redefinir senha' });
   }
 };
@@ -98,7 +99,7 @@ exports.registrar = async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };
@@ -149,7 +150,7 @@ exports.login = async (req, res) => {
       }
     );
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };
@@ -162,7 +163,7 @@ exports.getUsuario = async (req, res) => {
     const user = await User.findById(req.user.id).select('-senha');
     res.json(user);
   } catch (err) {
-    console.error(err.message);
+    logger.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };
