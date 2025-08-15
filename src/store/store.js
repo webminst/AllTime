@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { apiSlice } from './slices/apiSlice';
+import { productsApiSlice } from './slices/productsApiSlice';
 import cartSliceReducer from './slices/cartSlice';
 import authSliceReducer from './slices/authSlice';
 import userProfileReducer from './slices/userProfileSlice';
@@ -25,6 +26,7 @@ const authPersistConfig = {
 
 const rootReducer = {
   [apiSlice.reducerPath]: apiSlice.reducer,
+  [productsApiSlice.reducerPath]: productsApiSlice.reducer,
   cart: persistReducer(cartPersistConfig, cartSliceReducer),
   auth: persistReducer(authPersistConfig, authSliceReducer),
   userProfile: userProfileReducer,
@@ -44,7 +46,8 @@ const store = configureStore({
         ignoredPaths: ['api'],
       },
     }).concat(
-      apiSlice.middleware
+      apiSlice.middleware,
+      productsApiSlice.middleware
     ),
   devTools: process.env.NODE_ENV !== 'production',
 });

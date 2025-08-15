@@ -23,13 +23,30 @@ import {
   PRODUCT_TOP_FAIL,
 } from '../constants/productConstants';
 
-export const listProducts = (keyword = '', pageNumber = '') => async (dispatch) => {
+export const listProducts = (filters = {}, pageNumber = 1) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
 
-    const { data } = await axios.get(
-      `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
-    );
+    // Montar query string com filtros
+    const params = new URLSearchParams();
+    if (filters.keyword) params.append('keyword', filters.keyword);
+    if (filters.category) params.append('categoria', filters.category);
+    if (filters.marca) params.append('marca', filters.marca);
+    if (filters.price) {
+      // price pode ser '0-500', '500-1000', '1000-2000', '2000'
+      if (filters.price.includes('-')) {
+        const [min, max] = filters.price.split('-');
+        params.append('precoMin', min);
+        params.append('precoMax', max);
+      } else if (filters.price) {
+        params.append('precoMin', filters.price);
+      }
+    }
+    if (filters.rating) params.append('avaliacaoMin', filters.rating);
+    if (filters.order) params.append('order', filters.order);
+    params.append('pageNumber', pageNumber);
+
+    const { data } = await axios.get(`/api/produtos?${params.toString()}`);
 
     dispatch({
       type: PRODUCT_LIST_SUCCESS,

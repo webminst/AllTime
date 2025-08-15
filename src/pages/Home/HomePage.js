@@ -1,97 +1,108 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ProductCarousel from '../../components/ui/ProductCarousel';
+import { useGetTopProductsQuery } from '../../store/slices/productsApiSlice';
+import Loader from '../../components/ui/Loader';
+import Message from '../../components/ui/Message';
 
 const HomePage = () => {
+
+  const { data: topProducts, isLoading, error } = useGetTopProductsQuery();
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
+      {/* Banner Principal (Carrossel) */}
+      <section className="mb-8 sm:mb-12">
+        <ProductCarousel />
+      </section>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-8 mb-12">
+      <section className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-4 sm:p-8 mb-8 sm:mb-12">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">Bem-vindo à All Time</h1>
-          <p className="text-xl mb-8">Descubra nossa coleção exclusiva de relógios que combinam estilo e precisão.</p>
-          <Link 
-            to="/produtos" 
-            className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 inline-block"
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2 sm:mb-4">Bem-vindo à All Time</h1>
+          <p className="text-base sm:text-xl mb-4 sm:mb-8">Descubra nossa coleção exclusiva de relógios que combinam estilo e precisão.</p>
+          <Link
+            to="/produtos"
+            className="btn btn-primary text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-3"
           >
             Ver Produtos
           </Link>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Destaques</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Product Card 1 */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img 
-              src="/images/laurenzHeymann.jpg" 
-              alt="Relógio Destaque 1" 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Relógio Premium</h3>
-              <p className="text-gray-600 mb-4">Elegância e precisão em um único relógio.</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-bold">R$ 999,99</span>
-                <Link 
-                  to="/produto/1" 
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300"
-                >
-                  Ver Detalhes
-                </Link>
-              </div>
-            </div>
+      {/* Featured Products Dinâmicos */}
+      <section className="mb-8 sm:mb-12">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Destaques</h2>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            {(!error && topProducts && Array.isArray(topProducts) && topProducts.length > 0) ? (
+              topProducts.map((product) => (
+                <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-44 sm:h-48 object-cover"
+                  />
+                  <div className="p-3 sm:p-4 flex flex-col flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">{product.name}</h3>
+                    <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-4 flex-1">{product.description}</p>
+                    <div className="flex justify-between items-center mt-auto">
+                      <span className="text-lg sm:text-xl font-bold">R$ {product.price.toFixed(2)}</span>
+                      <Link
+                        to={`/produto/${product._id}`}
+                        className="btn btn-primary text-xs sm:text-base px-3 sm:px-4 py-1 sm:py-2"
+                      >
+                        Ver Detalhes
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                {/* Mockup de 3 produtos */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full">
+                  <img src="/images/laurenzHeymann.jpg" alt="Relógio Premium" className="w-full h-44 sm:h-48 object-cover" />
+                  <div className="p-3 sm:p-4 flex flex-col flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Relógio Premium</h3>
+                    <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-4 flex-1">Elegância e precisão em um único relógio.</p>
+                    <div className="flex justify-between items-center mt-auto">
+                      <span className="text-lg sm:text-xl font-bold">R$ 999,99</span>
+                      <Link to="/produto/1" className="btn btn-primary text-xs sm:text-base px-3 sm:px-4 py-1 sm:py-2">Ver Detalhes</Link>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full">
+                  <img src="/images/stevenAvila.jpg" alt="Relógio Esportivo" className="w-full h-44 sm:h-48 object-cover" />
+                  <div className="p-3 sm:p-4 flex flex-col flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Relógio Esportivo</h3>
+                    <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-4 flex-1">Perfeito para quem busca estilo e funcionalidade.</p>
+                    <div className="flex justify-between items-center mt-auto">
+                      <span className="text-lg sm:text-xl font-bold">R$ 799,99</span>
+                      <Link to="/produto/2" className="btn btn-primary text-xs sm:text-base px-3 sm:px-4 py-1 sm:py-2">Ver Detalhes</Link>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full">
+                  <img src="/images/rickyKharawala.jpg" alt="Relógio Clássico" className="w-full h-44 sm:h-48 object-cover" />
+                  <div className="p-3 sm:p-4 flex flex-col flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Relógio Clássico</h3>
+                    <p className="text-gray-600 text-sm sm:text-base mb-2 sm:mb-4 flex-1">Um clássico que nunca sai de moda.</p>
+                    <div className="flex justify-between items-center mt-auto">
+                      <span className="text-lg sm:text-xl font-bold">R$ 1.199,99</span>
+                      <Link to="/produto/3" className="btn btn-primary text-xs sm:text-base px-3 sm:px-4 py-1 sm:py-2">Ver Detalhes</Link>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-
-          {/* Product Card 2 */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img 
-              src="/images/stevenAvila.jpg" 
-              alt="Relógio Destaque 2" 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Relógio Esportivo</h3>
-              <p className="text-gray-600 mb-4">Perfeito para quem busca estilo e funcionalidade.</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-bold">R$ 799,99</span>
-                <Link 
-                  to="/produto/2" 
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300"
-                >
-                  Ver Detalhes
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Card 3 */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img 
-              src="/images/rickyKharawala.jpg" 
-              alt="Relógio Destaque 3" 
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Relógio Clássico</h3>
-              <p className="text-gray-600 mb-4">Um clássico que nunca sai de moda.</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-bold">R$ 1.199,99</span>
-                <Link 
-                  to="/produto/3" 
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300"
-                >
-                  Ver Detalhes
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </section>
 
       {/* Features */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8 sm:mb-12">
         <div className="text-center">
           <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -101,7 +112,7 @@ const HomePage = () => {
           <h3 className="text-xl font-semibold mb-2">Entrega Rápida</h3>
           <p className="text-gray-600">Entregamos em todo o Brasil em até 5 dias úteis.</p>
         </div>
-        
+
         <div className="text-center">
           <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -111,7 +122,7 @@ const HomePage = () => {
           <h3 className="text-xl font-semibold mb-2">Garantia</h3>
           <p className="text-gray-600">Todos os nossos produtos possuem garantia de 1 ano.</p>
         </div>
-        
+
         <div className="text-center">
           <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

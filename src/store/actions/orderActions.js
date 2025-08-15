@@ -228,3 +228,37 @@ export const listOrders = () => async (dispatch, getState) => {
     });
   }
 };
+
+export const iniciarPagamentoPix = (orderId) => async (dispatch, getState) => {
+  try {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.post(`/api/orders/${orderId}/pix`, {}, config);
+    return data; // retorna o payload PIX
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const confirmarPagamentoPix = (orderId) => async (dispatch, getState) => {
+  try {
+    const {
+      userLogin: { userInfo },
+    } = getState();
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
+    const { data } = await axios.put(`/api/orders/${orderId}/pix/confirmar`, {}, config);
+    return data; // retorna o pedido atualizado
+  } catch (error) {
+    throw error;
+  }
+};

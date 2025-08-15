@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getOrderDetails } from '../../store/actions/orderActions';
+import { getOrderDetails, iniciarPagamentoPix, confirmarPagamentoPix } from '../../store/actions/orderActions';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import Meta from '../../components/ui/Meta';
 import Message from '../../components/ui/Message';
@@ -65,15 +65,18 @@ const OrderPage = () => {
   };
 
   // Função para lidar com o pagamento bem-sucedido
+  // Estado para armazenar o resultado do pagamento
+  const [, setPaymentResult] = useState(null);
+
   const onApprove = (data, actions) => {
     return actions.order.capture().then((details) => {
-      const [, setPaymentResult] = useState(null);
       const paymentResult = {
         id: data.orderID,
         status: 'COMPLETED',
         update_time: new Date().toISOString(),
         email_address: details.payer.email_address,
       };
+      setPaymentResult(paymentResult);
       // Aqui você implementaria a lógica para atualizar o pedido como pago
       // dispatch(payOrder(orderId, paymentResult));
       toast.success('Pagamento realizado com sucesso!');
@@ -92,6 +95,38 @@ const OrderPage = () => {
     return new Date(dateString).toLocaleDateString('pt-BR', options);
   };
 
+  // Estado para o pagamento PIX
+  const [pixPayload, setPixPayload] = useState(null);
+  const [loadingPix, setLoadingPix] = useState(false);
+  const [confirmingPix, setConfirmingPix] = useState(false);
+
+  // Função para iniciar pagamento PIX
+  const handlePix = async () => {
+    setLoadingPix(true);
+    try {
+      const payload = await dispatch(iniciarPagamentoPix(order._id));
+      setPixPayload(payload);
+    } catch (err) {
+      toast.error('Erro ao gerar QR Code PIX');
+    } finally {
+      setLoadingPix(false);
+    }
+  };
+
+  // Função para confirmar pagamento PIX
+  const handlePixConfirm = async () => {
+    setConfirmingPix(true);
+    try {
+      await dispatch(confirmarPagamentoPix(order._id));
+      toast.success('Pagamento PIX confirmado!');
+      dispatch(getOrderDetails(orderId));
+    } catch (err) {
+      toast.error('Erro ao confirmar pagamento PIX');
+    } finally {
+      setConfirmingPix(false);
+    }
+  };
+
   return (
     <PayPalScriptProvider options={initialOptions}>
       <Meta title={`Pedido #${orderId}`} />
@@ -103,7 +138,7 @@ const OrderPage = () => {
         ) : (
           <>
             <h1 className="text-2xl font-bold text-gray-900 mb-8">Pedido #{order._id}</h1>
-            
+
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
                 <h2 className="text-lg leading-6 font-medium text-gray-900">Detalhes do Pedido</h2>
@@ -111,16 +146,15 @@ const OrderPage = () => {
                   Realizado em {formatDate(order.createdAt)}
                 </p>
               </div>
-              
+
               <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
                 <dl className="sm:divide-y sm:divide-gray-200">
                   {/* Status do pedido */}
                   <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Status do pedido</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        order.isPaid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.isPaid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {order.isPaid ? (
                           <>
                             <FaCheckCircle className="mr-1.5 h-4 w-4" />
@@ -133,7 +167,7 @@ const OrderPage = () => {
                           </>
                         )}
                       </span>
-                      
+
                       {order.isDelivered ? (
                         <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           <FaTruck className="mr-1.5 h-4 w-4" />
@@ -147,7 +181,7 @@ const OrderPage = () => {
                       )}
                     </dd>
                   </div>
-                  
+
                   {/* Método de pagamento */}
                   <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Método de pagamento</dt>
@@ -156,7 +190,42 @@ const OrderPage = () => {
                         <FaCreditCard className="h-5 w-5 text-gray-400 mr-2" />
                         {order.paymentMethod}
                       </div>
-                      {!order.isPaid && (
+                      {/* PIX Integration */}
+                      {order.paymentMethod === 'PIX' && !order.isPaid && (
+                        <div className="mt-4">
+                          {!pixPayload ? (
+                            <button
+                              onClick={handlePix}
+                              disabled={loadingPix}
+                              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none"
+                            >
+                              {loadingPix ? 'Gerando QR Code...' : 'Gerar QR Code PIX'}
+                            </button>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="bg-gray-100 p-3 rounded">
+                                <div className="font-semibold">Chave PIX:</div>
+                                <div className="break-all">{pixPayload.chave}</div>
+                                <div className="font-semibold mt-2">Valor:</div>
+                                <div>R$ {pixPayload.valor.toFixed(2).replace('.', ',')}</div>
+                                <div className="font-semibold mt-2">Descrição:</div>
+                                <div>{pixPayload.descricao}</div>
+                                <div className="font-semibold mt-2">Payload/QR Code:</div>
+                                <div className="break-all text-xs bg-white p-2 rounded border border-gray-200">{pixPayload.qrCode}</div>
+                              </div>
+                              <button
+                                onClick={handlePixConfirm}
+                                disabled={confirmingPix}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none"
+                              >
+                                {confirmingPix ? 'Confirmando...' : 'Confirmar Pagamento PIX'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {/* PayPal Integration (mantém o bloco existente) */}
+                      {order.paymentMethod === 'PayPal' && !order.isPaid && (
                         <div className="mt-4">
                           <h4 className="text-sm font-medium text-gray-900 mb-2">Pagar com PayPal</h4>
                           <div className="w-full max-w-xs">
@@ -171,7 +240,7 @@ const OrderPage = () => {
                       )}
                     </dd>
                   </div>
-                  
+
                   {/* Endereço de entrega */}
                   <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Endereço de entrega</dt>
@@ -190,7 +259,7 @@ const OrderPage = () => {
                       </div>
                     </dd>
                   </div>
-                  
+
                   {/* Itens do pedido */}
                   <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Itens do pedido</dt>
@@ -219,14 +288,14 @@ const OrderPage = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
                                     <div className="flex-shrink-0 h-16 w-16">
-                                      <img 
-                                        className="h-16 w-16 object-cover rounded-md" 
-                                        src={item.image} 
-                                        alt={item.name} 
+                                      <img
+                                        className="h-16 w-16 object-cover rounded-md"
+                                        src={item.image}
+                                        alt={item.name}
                                       />
                                     </div>
                                     <div className="ml-4">
-                                      <Link 
+                                      <Link
                                         to={`/produto/${item.product}`}
                                         className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
                                       >
@@ -252,9 +321,9 @@ const OrderPage = () => {
                       </div>
                     </dd>
                   </div>
-                
+
                 </dl>
-                
+
                 {/* Ações */}
                 <div className="mt-8 pt-6 border-t border-gray-200 flex justify-between px-4 sm:px-6">
                   <Link
@@ -263,7 +332,7 @@ const OrderPage = () => {
                   >
                     Voltar para meus pedidos
                   </Link>
-                  
+
                   <Link
                     to="/produtos"
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

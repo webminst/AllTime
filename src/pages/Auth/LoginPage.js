@@ -53,7 +53,7 @@ const LoginPage = () => {
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             {error && <Message variant="danger">{error}</Message>}
             {loading && <Loader />}
-            
+
             <form className="space-y-6" onSubmit={submitHandler}>
               <div>
                 <label
@@ -158,7 +158,7 @@ const LoginPage = () => {
 
                 <div className="text-sm">
                   <Link
-                    to="/esqueci-senha"
+                    to="/recuperar-senha"
                     className="font-medium text-indigo-600 hover:text-indigo-500"
                   >
                     Esqueceu sua senha?
@@ -192,7 +192,7 @@ const LoginPage = () => {
                     type="button"
                     className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     aria-label="Entrar com Google"
-                    onClick={() => {}}
+                    onClick={() => { }}
                   >
                     <span className="sr-only">Entrar com Google</span>
                     <svg
@@ -212,7 +212,7 @@ const LoginPage = () => {
                     type="button"
                     className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     aria-label="Entrar com Facebook"
-                    onClick={() => {}}
+                    onClick={() => { }}
                   >
                     <span className="sr-only">Entrar com Facebook</span>
                     <svg

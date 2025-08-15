@@ -10,6 +10,8 @@ export const PUBLIC_ROUTES = {
   CATEGORY: '/categoria/:category',
   PAGE: '/pagina/:pageNumber',
   SEARCH_WITH_PAGE: '/buscar/:keyword/pagina/:pageNumber',
+  FORGOT_PASSWORD: '/recuperar-senha',
+  RESET_PASSWORD: '/resetar-senha/:token',
 };
 
 // Rotas protegidas (requerem autenticação)
@@ -28,10 +30,10 @@ export const ADMIN_ROUTES = {
   ADMIN_PRODUCT_LIST: '/admin/lista-produtos',
   ADMIN_PRODUCT_CREATE: '/admin/produto/novo',
   ADMIN_PRODUCT_EDIT: '/admin/produto/:id/editar',
-  
+
   // Pedidos
   ADMIN_ORDER_LIST: '/admin/lista-pedidos',
-  
+
   // Usuários
   ADMIN_USER_LIST: '/admin/lista-usuarios',
   ADMIN_USER_EDIT: '/admin/usuario/:id/editar',
@@ -44,12 +46,12 @@ export const getRoute = {
   search: (keyword) => `/buscar/${encodeURIComponent(keyword)}`,
   category: (category) => `/categoria/${encodeURIComponent(category)}`,
   pagination: (pageNumber) => `/pagina/${pageNumber}`,
-  searchWithPage: (keyword, pageNumber) => 
+  searchWithPage: (keyword, pageNumber) =>
     `/buscar/${encodeURIComponent(keyword)}/pagina/${pageNumber}`,
-  
+
   // Rotas protegidas
   orderDetail: (id) => `/pedido/${id}`,
-  
+
   // Rotas de administração
   adminProductEdit: (id) => `/admin/produto/${id}/editar`,
   adminUserEdit: (id) => `/admin/usuario/${id}/editar`,

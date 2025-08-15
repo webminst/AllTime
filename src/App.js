@@ -39,6 +39,8 @@ import AdminOrderListPage from './pages/Admin/AdminOrderListPage';
 import AdminUserListPage from './pages/Admin/AdminUserListPage';
 import AdminUserEditPage from './pages/Admin/AdminUserEditPage';
 import NotFoundPage from './pages/Error/NotFoundPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
 
 // Private Route Components
 import PrivateRoute from './components/routing/PrivateRoute';
@@ -64,10 +66,10 @@ const AppContent = () => {
     const handleGlobalError = (event) => {
       // Prevent default error handling
       event.preventDefault();
-      
+
       // Log the error
       console.error('Global error caught:', event.error);
-      
+
       // Show user-friendly error message
       notification.error(
         'Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.'
@@ -86,13 +88,13 @@ const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-100 text-gray-800">
       <Header />
-      
+
       <main className="flex-grow">
         <ScrollToTop />
         <ScrollToTopOnNavigate />
         <Notification />
         <ToastContainer position="bottom-right" />
-        
+
         <Routes>
           {/* Rotas Públicas */}
           <Route path={ROUTES.HOME} element={<HomePage />} />
@@ -104,7 +106,9 @@ const AppContent = () => {
           <Route path={ROUTES.CART} element={<CartPage />} />
           <Route path={ROUTES.LOGIN} element={<LoginPage />} />
           <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-          
+          <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
+
           {/* Rotas Protegidas - Usuário Logado */}
           <Route element={<PrivateRoute />}>
             <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
@@ -114,7 +118,7 @@ const AppContent = () => {
             <Route path={ROUTES.PLACE_ORDER} element={<PlaceOrderPage />} />
             <Route path={ROUTES.ORDER_DETAIL} element={<OrderPage />} />
           </Route>
-          
+
           {/* Rotas de Administração */}
           <Route element={<AdminRoute />}>
             <Route path={ROUTES.ADMIN_PRODUCT_LIST} element={<AdminProductListPage />} />
@@ -124,12 +128,12 @@ const AppContent = () => {
             <Route path={ROUTES.ADMIN_USER_LIST} element={<AdminUserListPage />} />
             <Route path={ROUTES.ADMIN_USER_EDIT} element={<AdminUserEditPage />} />
           </Route>
-          
+
           {/* Rota 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      
+
       <Footer />
     </div>
   );

@@ -11,48 +11,39 @@ import ProductCarousel from '../../components/product/ProductCarousel';
 
 const ProductListPage = ({ match }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(8);
   const [filters, setFilters] = useState({
     category: '',
+    marca: '',
     price: '',
     rating: '',
     order: ''
   });
-
   const keyword = match.params.keyword || '';
-  const pageNumber = match.params.pageNumber || 1;
-  const category = match.params.category || '';
-
   const dispatch = useDispatch();
-
   const productList = useSelector((state) => state.productList);
   const { loading, error, products, page, pages } = productList;
 
+
+
+  // Buscar produtos ao alterar filtros ou página
   useEffect(() => {
-    dispatch(listProducts(keyword, pageNumber, category));
-  }, [dispatch, keyword, pageNumber, category]);
-
-  // Pagination
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products?.slice(indexOfFirstProduct, indexOfLastProduct) || [];
-
-  // Função de paginação movida para o componente de paginação
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+    dispatch(listProducts(filters, currentPage));
+  }, [dispatch, filters, currentPage]);
+  const currentProducts = products || [];
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters({
-      ...filters,
+    setFilters((prev) => ({
+      ...prev,
       [name]: value
-    });
-    // Aqui você pode adicionar a lógica para filtrar os produtos
+    }));
+    setCurrentPage(1);
   };
 
   return (
     <>
       <Meta title="Nossos Produtos" />
-      
+
       {!keyword ? (
         <ProductCarousel />
       ) : (
@@ -60,10 +51,10 @@ const ProductListPage = ({ match }) => {
           Voltar
         </Link>
       )}
-      
+
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Nossos Relógios</h1>
-        
+
         {/* Filtros */}
         <div className="bg-white p-4 rounded-lg shadow-md mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -76,13 +67,22 @@ const ProductListPage = ({ match }) => {
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">Todas as categorias</option>
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-                <option value="esportivo">Esportivo</option>
-                <option value="luxo">Luxo</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Unissex">Unissex</option>
               </select>
             </div>
-            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+              <input
+                type="text"
+                name="marca"
+                value={filters.marca}
+                onChange={handleFilterChange}
+                placeholder="Digite a marca"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
               <select
@@ -98,7 +98,7 @@ const ProductListPage = ({ match }) => {
                 <option value="2000">Acima de R$ 2000</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Avaliação</label>
               <select
@@ -114,7 +114,7 @@ const ProductListPage = ({ match }) => {
                 <option value="1">1 estrela ou mais</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
               <select
@@ -132,7 +132,7 @@ const ProductListPage = ({ match }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Lista de Produtos */}
         {loading ? (
           <Loader />
@@ -147,7 +147,7 @@ const ProductListPage = ({ match }) => {
                 </div>
               ))}
             </div>
-            
+
             {/* Paginação */}
             <div className="mt-8">
               <Paginate
