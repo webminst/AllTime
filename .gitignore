@@ -1,25 +1,8 @@
-<<<<<<< HEAD
 # Dependências
-=======
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
->>>>>>> merge-secondary
 /node_modules
 /.pnp
 .pnp.js
 
-<<<<<<< HEAD
-# Testes
-/coverage
-
-# Produção
-/build
-/dist
-
-# Variáveis de ambiente
-.env
-=======
 # testing
 /coverage
 
@@ -28,7 +11,6 @@
 
 # misc
 .DS_Store
->>>>>>> merge-secondary
 .env.local
 .env.development.local
 .env.test.local
