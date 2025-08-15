@@ -21,8 +21,7 @@ exports.protect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      const logger = require('../utils/logger');
-      logger.error(error);
+      console.error(error);
       res.status(401).json({ msg: 'Token inválido' });
     }
   }

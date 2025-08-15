@@ -1,61 +1,3 @@
-const crypto = require('crypto');
-const sendEmail = require('../utils/sendEmail');
-// @desc    Solicitar recuperação de senha
-// @route   POST /api/auth/forgot-password
-// @access  Público
-exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
-  const logger = require('../utils/logger');
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
-    }
-    // Gerar token
-    const token = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
-    await user.save();
-    // Montar link de reset
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/resetar-senha/${token}`;
-    // Enviar e-mail
-    await sendEmail({
-      to: user.email,
-      subject: 'Recuperação de senha - AllTime',
-      text: `Você solicitou a recuperação de senha. Clique no link para redefinir: ${resetUrl}`,
-      html: `<p>Você solicitou a recuperação de senha.</p><p><a href="${resetUrl}">Clique aqui para redefinir sua senha</a></p>`
-    });
-    res.json({ message: 'E-mail de recuperação enviado' });
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: 'Erro ao enviar e-mail de recuperação' });
-  }
-};
-
-// @desc    Redefinir senha
-// @route   POST /api/auth/reset-password/:token
-// @access  Público
-exports.resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { senha } = req.body;
-  try {
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-    if (!user) {
-      return res.status(400).json({ message: 'Token inválido ou expirado' });
-    }
-    user.senha = senha;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
-    res.json({ message: 'Senha redefinida com sucesso' });
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ message: 'Erro ao redefinir senha' });
-  }
-};
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -99,7 +41,7 @@ exports.registrar = async (req, res) => {
       }
     );
   } catch (err) {
-    logger.error(err.message);
+    console.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };
@@ -138,7 +80,7 @@ exports.login = async (req, res) => {
       { expiresIn: '5d' },
       (err, token) => {
         if (err) throw err;
-        res.json({
+        res.json({ 
           token,
           user: {
             id: user._id,
@@ -150,7 +92,7 @@ exports.login = async (req, res) => {
       }
     );
   } catch (err) {
-    logger.error(err.message);
+    console.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };
@@ -163,7 +105,7 @@ exports.getUsuario = async (req, res) => {
     const user = await User.findById(req.user.id).select('-senha');
     res.json(user);
   } catch (err) {
-    logger.error(err.message);
+    console.error(err.message);
     res.status(500).send('Erro no servidor');
   }
 };

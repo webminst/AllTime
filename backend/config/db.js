@@ -1,6 +1,4 @@
-
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
 require('dotenv').config();
 
 const connectDB = async () => {
@@ -9,9 +7,9 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    logger.info('MongoDB conectado com sucesso');
+    console.log('MongoDB conectado com sucesso');
   } catch (err) {
-    logger.error(`Erro ao conectar ao MongoDB: ${err && err.message ? err.message : err}`);
+    console.error('Erro ao conectar ao MongoDB:', err.message);
     process.exit(1);
   }
 };

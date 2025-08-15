@@ -4,39 +4,27 @@ const Produto = require('../models/Produto');
 // @route   GET /api/produtos
 // @access  Público
 exports.getProdutos = async (req, res) => {
-  const logger = require('../utils/logger');
   try {
     const pageSize = 10;
     const page = Number(req.query.pageNumber) || 1;
-
-    // Filtros avançados
+    
     const keyword = req.query.keyword
-      ? { nome: { $regex: req.query.keyword, $options: 'i' } }
+      ? {
+          nome: {
+            $regex: req.query.keyword,
+            $options: 'i',
+          },
+        }
       : {};
-    const categoria = req.query.categoria ? { categoria: req.query.categoria } : {};
-    const marca = req.query.marca ? { marca: req.query.marca } : {};
-    const precoMin = req.query.precoMin ? { preco: { $gte: Number(req.query.precoMin) } } : {};
-    const precoMax = req.query.precoMax ? { preco: { $lte: Number(req.query.precoMax) } } : {};
-    const avaliacaoMin = req.query.avaliacaoMin ? { avaliacao: { $gte: Number(req.query.avaliacaoMin) } } : {};
 
-    // Combinar todos os filtros
-    const filtro = {
-      ...keyword,
-      ...categoria,
-      ...marca,
-      ...precoMin,
-      ...precoMax,
-      ...avaliacaoMin,
-    };
-
-    const count = await Produto.countDocuments(filtro);
-    const produtos = await Produto.find(filtro)
+    const count = await Produto.countDocuments({ ...keyword });
+    const produtos = await Produto.find({ ...keyword })
       .limit(pageSize)
       .skip(pageSize * (page - 1));
 
     res.json({ produtos, page, pages: Math.ceil(count / pageSize) });
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao buscar produtos' });
   }
 };
@@ -54,7 +42,7 @@ exports.getProdutoPorId = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao buscar o produto' });
   }
 };
@@ -79,7 +67,7 @@ exports.criarProduto = async (req, res) => {
     const produtoCriado = await produto.save();
     res.status(201).json(produtoCriado);
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao criar o produto' });
   }
 };
@@ -116,7 +104,7 @@ exports.atualizarProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao atualizar o produto' });
   }
 };
@@ -135,7 +123,7 @@ exports.deletarProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao remover o produto' });
   }
 };
@@ -181,7 +169,7 @@ exports.criarAvaliacaoProduto = async (req, res) => {
       res.status(404).json({ message: 'Produto não encontrado' });
     }
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao adicionar avaliação' });
   }
 };
@@ -192,18 +180,9 @@ exports.criarAvaliacaoProduto = async (req, res) => {
 exports.getProdutosDestaque = async (req, res) => {
   try {
     const produtos = await Produto.find({ emDestaque: true }).limit(3);
-    // Mapear para o formato esperado pelo front-end
-    const produtosMapeados = produtos.map((p) => ({
-      _id: p._id,
-      name: p.nome,
-      description: p.descricao,
-      price: p.preco,
-      image: p.imagem,
-      // outros campos se necessário
-    }));
-    res.json(produtosMapeados);
+    res.json(produtos);
   } catch (error) {
-    logger.error(error);
+    console.error(error);
     res.status(500).json({ message: 'Erro ao buscar produtos em destaque' });
   }
 };

@@ -1,7 +1,5 @@
 # All Time - Loja de Relógios Online
 
-![CI](https://github.com/webminst/AllTime/actions/workflows/ci.yml/badge.svg)
-
 ## Descrição
 
 Website e-commerce para a loja All Time, especializada em relógios de alta qualidade.
