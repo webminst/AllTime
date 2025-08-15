@@ -35,7 +35,9 @@
     "server:dev": "nodemon server.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client",
+    "lint": "eslint . --ext .js,.jsx",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": [
@@ -66,8 +68,13 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "autoprefixer": "^10.4.16",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "jest": "^27.5.1",
     "postcss": "^8.4.31",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
     "tailwindcss": "^3.3.0"
   }
 }
