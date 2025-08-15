@@ -3,6 +3,9 @@ const router = express.Router();
 const { check } = require('express-validator');
 const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
+// Recuperação de senha
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password/:token', authController.resetPassword);
 
 // @route    POST api/auth/registrar
 // @desc     Registrar usuário

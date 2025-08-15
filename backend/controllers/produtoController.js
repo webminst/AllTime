@@ -7,18 +7,29 @@ exports.getProdutos = async (req, res) => {
   try {
     const pageSize = 10;
     const page = Number(req.query.pageNumber) || 1;
-    
-    const keyword = req.query.keyword
-      ? {
-          nome: {
-            $regex: req.query.keyword,
-            $options: 'i',
-          },
-        }
-      : {};
 
-    const count = await Produto.countDocuments({ ...keyword });
-    const produtos = await Produto.find({ ...keyword })
+    // Filtros avançados
+    const keyword = req.query.keyword
+      ? { nome: { $regex: req.query.keyword, $options: 'i' } }
+      : {};
+    const categoria = req.query.categoria ? { categoria: req.query.categoria } : {};
+    const marca = req.query.marca ? { marca: req.query.marca } : {};
+    const precoMin = req.query.precoMin ? { preco: { $gte: Number(req.query.precoMin) } } : {};
+    const precoMax = req.query.precoMax ? { preco: { $lte: Number(req.query.precoMax) } } : {};
+    const avaliacaoMin = req.query.avaliacaoMin ? { avaliacao: { $gte: Number(req.query.avaliacaoMin) } } : {};
+
+    // Combinar todos os filtros
+    const filtro = {
+      ...keyword,
+      ...categoria,
+      ...marca,
+      ...precoMin,
+      ...precoMax,
+      ...avaliacaoMin,
+    };
+
+    const count = await Produto.countDocuments(filtro);
+    const produtos = await Produto.find(filtro)
       .limit(pageSize)
       .skip(pageSize * (page - 1));
 
@@ -180,7 +191,16 @@ exports.criarAvaliacaoProduto = async (req, res) => {
 exports.getProdutosDestaque = async (req, res) => {
   try {
     const produtos = await Produto.find({ emDestaque: true }).limit(3);
-    res.json(produtos);
+    // Mapear para o formato esperado pelo front-end
+    const produtosMapeados = produtos.map((p) => ({
+      _id: p._id,
+      name: p.nome,
+      description: p.descricao,
+      price: p.preco,
+      image: p.imagem,
+      // outros campos se necessário
+    }));
+    res.json(produtosMapeados);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar produtos em destaque' });

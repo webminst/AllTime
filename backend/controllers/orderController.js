@@ -1,3 +1,53 @@
+// @desc    Iniciar pagamento PIX (gera payload e QR Code)
+// @route   POST /api/orders/:id/pix
+// @access  Privado
+exports.iniciarPagamentoPix = async (req, res) => {
+  try {
+    const pedido = await Order.findById(req.params.id);
+    if (!pedido) {
+      return res.status(404).json({ message: 'Pedido não encontrado' });
+    }
+    // Exemplo de payload PIX fictício (substitua por integração real)
+    const pixPayload = {
+      chave: process.env.PIX_CHAVE || 'chave-pix-exemplo@banco.com',
+      valor: pedido.precoTotal,
+      descricao: `Pedido #${pedido._id}`,
+      // Aqui você pode gerar um QR Code base64 se desejar
+      qrCode: `00020126580014BR.GOV.BCB.PIX0136${process.env.PIX_CHAVE || 'chave-pix-exemplo@banco.com'}520400005303986540${pedido.precoTotal.toFixed(2).replace('.', '')}5802BR5913AllTime Store6009SaoPaulo62070503***`,
+    };
+    res.json(pixPayload);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao iniciar pagamento PIX' });
+  }
+};
+
+// @desc    Confirmar pagamento PIX manualmente (simulação)
+// @route   PUT /api/orders/:id/pix/confirmar
+// @access  Privado
+exports.confirmarPagamentoPix = async (req, res) => {
+  try {
+    const pedido = await Order.findById(req.params.id);
+    if (!pedido) {
+      return res.status(404).json({ message: 'Pedido não encontrado' });
+    }
+    // Aqui, em uma integração real, você validaria o pagamento via API do banco
+    pedido.isPago = true;
+    pedido.pagoEm = Date.now();
+    pedido.resultadoPagamento = {
+      id: `pix-${pedido._id}`,
+      status: 'COMPLETED',
+      update_time: new Date().toISOString(),
+      email_address: req.user.email,
+      metodo: 'PIX',
+    };
+    const pedidoAtualizado = await pedido.save();
+    res.json(pedidoAtualizado);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao confirmar pagamento PIX' });
+  }
+};
 const Order = require('../models/Order');
 const Produto = require('../models/Produto');
 
@@ -22,14 +72,14 @@ exports.criarPedido = async (req, res) => {
     // Verificar se os produtos existem e têm estoque suficiente
     for (const item of itensPedido) {
       const produto = await Produto.findById(item.produto);
-      
+
       if (!produto) {
         return res.status(404).json({ message: `Produto não encontrado: ${item.produto}` });
       }
-      
+
       if (produto.estoque < item.quantidade) {
-        return res.status(400).json({ 
-          message: `Estoque insuficiente para o produto: ${produto.nome}` 
+        return res.status(400).json({
+          message: `Estoque insuficiente para o produto: ${produto.nome}`
         });
       }
     }
